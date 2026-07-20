@@ -9,6 +9,9 @@ const authBaseUrl = rawApiUrl
 
 export const authClient = createAuthClient({
   baseURL: authBaseUrl,
+  fetchOptions: {
+    credentials: "include",
+  },
 });
 
 export const { signIn, signUp, signOut, useSession } = authClient;
