@@ -1,44 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getSessionCookie } from "better-auth/cookies";
+import { NextResponse } from "next/server";
 
-const PROTECTED_PREFIXES = [
-  "/dashboard",
-  "/profile",
-  "/settings",
-  "/resources/add",
-  "/resources/manage",
-  "/ai",
-];
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  const isProtected = PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
-
-  if (!isProtected) {
-    return NextResponse.next();
-  }
-
-  const sessionCookie = getSessionCookie(request);
-
-  if (!sessionCookie) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirectTo", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
+// NOTE: Edge middleware can't reliably check auth when the frontend and
+// backend live on different domains (e.g. vercel.app + onrender.com), since
+// the session cookie belongs to the backend's domain and is never visible
+// here. Route protection is handled client-side instead (see
+// components/shared/RequireAuth.tsx).
+export function middleware() {
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/profile/:path*",
-    "/settings/:path*",
-    "/resources/add/:path*",
-    "/resources/manage/:path*",
-    "/ai/:path*",
-  ],
+  matcher: [],
 };
