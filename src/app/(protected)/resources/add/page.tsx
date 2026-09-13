@@ -19,6 +19,7 @@ import {
 import { SUBJECTS, DIFFICULTIES } from "@/constants/resources";
 import { useCreateResource } from "@/hooks/useResources";
 import { CreateResourceInput } from "@/types/resource";
+import { auth } from "@/lib/firebase"; 
 
 const addResourceSchema = z.object({
   title: z.string().trim().min(3, "Title must be at least 3 characters").max(120),
@@ -54,6 +55,9 @@ export default function AddResourcePage() {
   });
 
   const onSubmit = async (data: AddResourceForm) => {
+  
+    const currentUser = auth.currentUser;
+
     await createResource.mutateAsync({
       title: data.title,
       shortDescription: data.shortDescription,
@@ -63,7 +67,9 @@ export default function AddResourcePage() {
       estimatedStudyTimeMinutes: data.estimatedStudyTimeMinutes,
       tags: data.tags ? data.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
       imageUrl: data.imageUrl || undefined,
-    });
+      ownerId: currentUser?.uid,
+    } as any);
+
     router.push("/resources/manage");
   };
 

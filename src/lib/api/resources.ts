@@ -1,4 +1,5 @@
 import { api } from "@/lib/axios";
+import { auth } from "@/lib/firebase";
 import {
   Resource,
   ResourceListResponse,
@@ -37,8 +38,28 @@ export const fetchRelatedResources = async (id: string): Promise<Resource[]> => 
   return data.items;
 };
 
-export const createResource = async (input: CreateResourceInput): Promise<Resource> => {
-  const { data } = await api.post<{ success: true; resource: Resource }>("/resources", input);
+export const createResource = async (
+  input: CreateResourceInput & { ownerId?: string }
+): Promise<Resource> => {
+  //  . Input-    ownerId   Firebase currentUser   UID  
+  let ownerId = input.ownerId || auth.currentUser?.uid;
+
+  //  .   auth.currentUser        , Token Result   UID    
+  if (!ownerId && auth.currentUser) {
+    try {
+      const tokenResult = await auth.currentUser.getIdTokenResult();
+      ownerId = tokenResult.claims.sub as string;
+    } catch (e) {
+      console.error("Failed to extract UID from token", e);
+    }
+  }
+
+  const payload = {
+    ...input,
+    
+  }
+
+  const { data } = await api.post<{ success: true; resource: Resource }>("/resources", payload);
   return data.resource;
 };
 

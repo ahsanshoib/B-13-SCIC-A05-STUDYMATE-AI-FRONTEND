@@ -1,3 +1,5 @@
+import { auth } from "@/lib/firebase"; //            
+
 export interface StreamChatCallbacks {
   onInit?: (conversationId: string) => void;
   onChunk: (text: string) => void;
@@ -5,20 +7,27 @@ export interface StreamChatCallbacks {
   onError?: (message: string) => void;
 }
 
-/**
- * Streams a chat reply using fetch + ReadableStream, parsing Server-Sent
- * Events manually (axios has no native SSE support).
- */
 export async function streamChatMessage(
   params: { conversationId?: string; message: string },
   callbacks: StreamChatCallbacks
 ): Promise<void> {
   const baseURL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api";
 
+  const currentUser = auth.currentUser;
+  if (!currentUser) {
+    callbacks.onError?.("User is not authenticated. Please log in again.");
+    return;
+  }
+
+  const token = await currentUser.getIdToken();
+
+  
   const response = await fetch(`${baseURL}/chat/stream`, {
     method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // 
+    },
     body: JSON.stringify(params),
   });
 

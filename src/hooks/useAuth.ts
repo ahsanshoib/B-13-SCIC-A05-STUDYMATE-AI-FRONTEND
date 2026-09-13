@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "@/lib/auth-client";
+import { useAuthContext } from "@/context/AuthContext";
 
 export interface SessionUser {
   id: string;
@@ -16,18 +16,18 @@ export interface UseAuthResult {
 }
 
 export function useAuth(): UseAuthResult {
-  const { data, isPending } = useSession();
+  const { user, loading } = useAuthContext();
 
   return {
-    user: data?.user
+    user: user
       ? {
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
-          image: data.user.image,
+          id: user.uid,
+          name: user.displayName || user.email?.split("@")[0] || "User",
+          email: user.email || "",
+          image: user.photoURL || null,
         }
       : null,
-    isLoading: isPending,
-    isAuthenticated: !!data?.user,
+    isLoading: loading,
+    isAuthenticated: !!user,
   };
 }

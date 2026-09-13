@@ -13,7 +13,7 @@ import { GoogleButton } from "@/components/shared/GoogleButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
+import { loginWithEmail } from "@/services/authService";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Enter a valid email address"),
@@ -43,13 +43,13 @@ export default function LoginPage() {
 
   const submitLogin = async (email: string, password: string) => {
     setServerError(null);
-    const { error } = await authClient.signIn.email({ email, password });
-    if (error) {
-      setServerError(error.message ?? "Invalid email or password");
-      return;
+    try {
+      await loginWithEmail(email, password);
+      toast.success("Welcome back!");
+      router.push(redirectTo);
+    } catch (error: any) {
+      setServerError(error.message || "Invalid email or password");
     }
-    toast.success("Welcome back!");
-    router.push(redirectTo);
   };
 
   const onSubmit = (data: LoginForm) => submitLogin(data.email, data.password);

@@ -7,17 +7,23 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
-import { authClient } from "@/lib/auth-client";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+
+// import { authClient } from "@/lib/auth-client";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
 
-  const handleSignOut = async () => {
-    await authClient.signOut();
-    toast.success("Signed out");
-    router.push("/");
-  };
+const handleSignOut = async () => {
+  try {
+    await signOut(auth);
+    router.push("/login");
+  } catch (error) {
+    console.error("Error signing out:", error);
+  }
+};
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 lg:px-8">

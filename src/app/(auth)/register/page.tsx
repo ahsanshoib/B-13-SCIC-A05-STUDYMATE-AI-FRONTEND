@@ -12,7 +12,8 @@ import { GoogleButton } from "@/components/shared/GoogleButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
+import { auth } from "@/lib/firebase"; 
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 const registerSchema = z
   .object({
@@ -44,19 +45,25 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterForm) => {
     setServerError(null);
-    const { error } = await authClient.signUp.email({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    });
+    try {
 
-    if (error) {
-      setServerError(error.message ?? "Could not create your account");
-      return;
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      );
+
+      if (userCredential.user) {
+        await updateProfile(userCredential.user, {
+          displayName: data.name,
+        });
+      }
+
+      toast.success("Account created — welcome to StudyMate AI!");
+      router.push("/dashboard");
+    } catch (err: any) {
+      setServerError(err.message ?? "Could not create your account");
     }
-
-    toast.success("Account created — welcome to StudyMate AI!");
-    router.push("/dashboard");
   };
 
   return (

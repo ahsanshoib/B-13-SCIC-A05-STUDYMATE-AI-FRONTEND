@@ -4,6 +4,7 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ToastContainer } from "react-toastify";
+import { AuthProvider } from "@/context/AuthContext"; 
 import "react-toastify/dist/ReactToastify.css";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -22,11 +23,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
-      <ToastContainer position="top-right" autoClose={3500} theme="colored" />
-      {/* {`process.env.NODE_ENV === "development" && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )`} */}
+      <AuthProvider>
+        {children}
+        <ToastContainer position="top-right" autoClose={3500} theme="colored" />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

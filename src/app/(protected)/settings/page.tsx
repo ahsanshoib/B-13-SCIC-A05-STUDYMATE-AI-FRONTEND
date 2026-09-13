@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
-import { authClient } from "@/lib/auth-client";
+import { auth } from "@/lib/firebase";  
+import { updateProfile } from "firebase/auth";
 
 const nameSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(80),
@@ -61,12 +64,22 @@ export default function SettingsPage() {
   });
 
   const onSubmit = async (data: NameForm) => {
-    const { error } = await authClient.updateUser({ name: data.name });
-    if (error) {
-      toast.error(error.message ?? "Could not update your name");
-      return;
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        toast.error("No authenticated user found");
+        return;
+      }
+
+            
+      await updateProfile(currentUser, {
+        displayName: data.name,
+      });
+
+      toast.success("Profile updated");
+    } catch (err: any) {
+      toast.error(err.message ?? "Could not update your name");
     }
-    toast.success("Profile updated");
   };
 
   return (

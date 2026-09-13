@@ -1,22 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
+import { loginWithGoogle } from "@/services/authService";
 
 export function GoogleButton({ redirectTo = "/dashboard" }: { redirectTo?: string }) {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      await authClient.signIn.social({
-        provider: "google",
-        callbackURL: redirectTo,
-      });
+      await loginWithGoogle();
+      toast.success("Logged in successfully!");
+      router.push(redirectTo);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Google sign-in failed");
+    } finally {
       setLoading(false);
     }
   };
@@ -29,7 +31,7 @@ export function GoogleButton({ redirectTo = "/dashboard" }: { redirectTo?: strin
       onClick={handleGoogleSignIn}
       disabled={loading}
     >
-      <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+      <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" aria-hidden="true">
         <path
           fill="#4285F4"
           d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"
@@ -47,7 +49,7 @@ export function GoogleButton({ redirectTo = "/dashboard" }: { redirectTo?: strin
           d="M12 4.77c1.76 0 3.34.6 4.59 1.79l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.63l3.98 3.09C6.22 6.88 8.87 4.77 12 4.77z"
         />
       </svg>
-      {loading ? "Redirecting..." : "Continue with Google"}
+      {loading ? "Signing in..." : "Continue with Google"}
     </Button>
   );
 }
