@@ -26,7 +26,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 const DEMO_CREDENTIALS = {
   email: "demo@studymate.ai",
-  password: "StudyMateDemo456!",
+  password: "StudyMateDemo123!",
 };
 
 export default function LoginPage() {
