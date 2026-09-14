@@ -1,1 +1,0 @@
-export const DEMO_EMAIL = "demo@studymate.ai";

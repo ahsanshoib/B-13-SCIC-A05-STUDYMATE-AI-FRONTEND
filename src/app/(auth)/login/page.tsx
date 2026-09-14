@@ -7,15 +7,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "react-toastify";
-import { Sparkles } from "lucide-react";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { GoogleButton } from "@/components/shared/GoogleButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { loginWithEmail } from "@/services/authService";
-import { auth as firebaseAuth } from "@/lib/firebase";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Enter a valid email address"),
@@ -24,17 +21,11 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-const DEMO_CREDENTIALS = {
-  email: "demo@studymate.ai",
-  password: "StudyMateDemo123!",
-};
-
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/dashboard";
   const [serverError, setServerError] = useState<string | null>(null);
-  const [demoLoading, setDemoLoading] = useState(false);
 
   const {
     register,
@@ -42,54 +33,22 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
 
-  const submitLogin = async (email: string, password: string) => {
+  const onSubmit = async (data: LoginForm) => {
     setServerError(null);
     try {
-      await loginWithEmail(email, password);
+      await loginWithEmail(data.email, data.password);
       toast.success("Welcome back!");
       router.push(redirectTo);
     } catch (error: any) {
-      setServerError(error.message || "Invalid email or password");
-    }
-  };
-
-  const onSubmit = (data: LoginForm) => submitLogin(data.email, data.password);
-
-  const handleDemoLogin = async () => {
-    setDemoLoading(true);
-    try {
-      await signInWithEmailAndPassword(firebaseAuth, DEMO_CREDENTIALS.email, DEMO_CREDENTIALS.password);
-      toast.success("Welcome back!");
-      router.push(redirectTo);
-    } catch (error) {
-      toast.error(
-        "Please Register or Login to Explore all the features like AI PLANNER, ASSISTANT, SUMMARIZER for 100% free!",
-        { autoClose: 6000 }
-      );
-    } finally {
-      setDemoLoading(false);
+      const message =
+        "Please Register or Login to Explore all the features like AI PLANNER, ASSISTANT, SUMMARIZER for 100% free!";
+      setServerError(message);
+      toast.error(message, { autoClose: 6000 });
     }
   };
 
   return (
     <AuthLayout title="Welcome back" subtitle="Log in to continue your study plan">
-      <Button
-        type="button"
-        variant="accent"
-        className="w-full"
-        onClick={handleDemoLogin}
-        disabled={demoLoading || isSubmitting}
-      >
-        <Sparkles className="h-4 w-4" />
-        {demoLoading ? "Logging in..." : "Try the demo account"}
-      </Button>
-
-      <div className="my-5 flex items-center gap-3">
-        <div className="h-px flex-1 bg-border" />
-        <span className="text-xs text-muted-foreground">or log in with your account</span>
-        <div className="h-px flex-1 bg-border" />
-      </div>
-
       <GoogleButton redirectTo={redirectTo} />
 
       <div className="my-5 flex items-center gap-3">
@@ -134,7 +93,7 @@ export default function LoginPage() {
           {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
 
-        <Button type="submit" className="w-full" disabled={isSubmitting || demoLoading}>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? "Logging in..." : "Log in"}
         </Button>
       </form>

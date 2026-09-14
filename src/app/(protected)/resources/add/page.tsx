@@ -20,7 +20,7 @@ import { SUBJECTS, DIFFICULTIES } from "@/constants/resources";
 import { useCreateResource } from "@/hooks/useResources";
 import { CreateResourceInput } from "@/types/resource";
 import { useAuth } from "@/hooks/useAuth";
-import { DEMO_EMAIL } from "@/constants/demo";
+import { ADMIN_EMAIL } from "@/constants/admin";
 
 const addResourceSchema = z.object({
   title: z.string().trim().min(3, "Title must be at least 3 characters").max(120),
@@ -45,7 +45,7 @@ export default function AddResourcePage() {
   const router = useRouter();
   const createResource = useCreateResource();
   const { user, isLoading: authLoading } = useAuth();
-  const isDemoUser = user?.email === DEMO_EMAIL;
+  const isAdminUser = user?.email === ADMIN_EMAIL;
 
   const {
     register,
@@ -72,7 +72,7 @@ export default function AddResourcePage() {
     router.push("/resources/manage");
   };
 
-  if (!authLoading && !isDemoUser) {
+  if (!authLoading && !isAdminUser) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-8">
         <h1 className="text-xl font-semibold text-foreground">Adding resources is limited</h1>

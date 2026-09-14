@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useMyResources, useDeleteResource } from "@/hooks/useResources";
 import { formatStudyTime, formatDate, difficultyLabel } from "@/lib/format";
 import { useAuth } from "@/hooks/useAuth";
-import { DEMO_EMAIL } from "@/constants/demo";
+import { ADMIN_EMAIL } from "@/constants/admin";
 
 export default function ManageResourcesPage() {
   const { data: resources, isLoading } = useMyResources();
@@ -23,7 +23,7 @@ export default function ManageResourcesPage() {
   };
 
   const { user } = useAuth();
-  const isDemoUser = user?.email === DEMO_EMAIL;
+  const isAdminUser = user?.email === ADMIN_EMAIL;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
