@@ -8,12 +8,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "react-toastify";
 import { Sparkles } from "lucide-react";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { GoogleButton } from "@/components/shared/GoogleButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { loginWithEmail } from "@/services/authService";
+import { auth as firebaseAuth } from "@/lib/firebase";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Enter a valid email address"),
@@ -37,7 +39,6 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
 
@@ -55,11 +56,19 @@ export default function LoginPage() {
   const onSubmit = (data: LoginForm) => submitLogin(data.email, data.password);
 
   const handleDemoLogin = async () => {
-    setValue("email", DEMO_CREDENTIALS.email, { shouldValidate: true });
-    setValue("password", DEMO_CREDENTIALS.password, { shouldValidate: true });
     setDemoLoading(true);
-    await submitLogin(DEMO_CREDENTIALS.email, DEMO_CREDENTIALS.password);
-    setDemoLoading(false);
+    try {
+      await signInWithEmailAndPassword(firebaseAuth, DEMO_CREDENTIALS.email, DEMO_CREDENTIALS.password);
+      toast.success("Welcome back!");
+      router.push(redirectTo);
+    } catch (error) {
+      toast.error(
+        "Please Register or Login to Explore all the features like AI PLANNER, ASSISTANT, SUMMARIZER for 100% free!",
+        { autoClose: 6000 }
+      );
+    } finally {
+      setDemoLoading(false);
+    }
   };
 
   return (

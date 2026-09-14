@@ -19,13 +19,14 @@ import {
 import { SUBJECTS, DIFFICULTIES } from "@/constants/resources";
 import { useCreateResource } from "@/hooks/useResources";
 import { CreateResourceInput } from "@/types/resource";
-import { auth } from "@/lib/firebase"; 
+import { useAuth } from "@/hooks/useAuth";
+import { DEMO_EMAIL } from "@/constants/demo";
 
 const addResourceSchema = z.object({
   title: z.string().trim().min(3, "Title must be at least 3 characters").max(120),
   shortDescription: z.string().trim().min(10, "At least 10 characters").max(220),
   fullDescription: z.string().trim().min(30, "At least 30 characters").max(8000),
-  subject: z.enum(SUBJECTS as [string, ...string[]], { errorMap: () => ({ message: "Choose a subject" }) }),
+  subject: z.string().min(1, "Choose a subject"),
   difficulty: z.enum(["beginner", "intermediate", "advanced"], {
     errorMap: () => ({ message: "Choose a difficulty" }),
   }),
@@ -43,6 +44,8 @@ type AddResourceForm = z.infer<typeof addResourceSchema>;
 export default function AddResourcePage() {
   const router = useRouter();
   const createResource = useCreateResource();
+  const { user, isLoading: authLoading } = useAuth();
+  const isDemoUser = user?.email === DEMO_EMAIL;
 
   const {
     register,
@@ -55,9 +58,6 @@ export default function AddResourcePage() {
   });
 
   const onSubmit = async (data: AddResourceForm) => {
-  
-    const currentUser = auth.currentUser;
-
     await createResource.mutateAsync({
       title: data.title,
       shortDescription: data.shortDescription,
@@ -67,11 +67,21 @@ export default function AddResourcePage() {
       estimatedStudyTimeMinutes: data.estimatedStudyTimeMinutes,
       tags: data.tags ? data.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
       imageUrl: data.imageUrl || undefined,
-      ownerId: currentUser?.uid,
-    } as any);
+    });
 
     router.push("/resources/manage");
   };
+
+  if (!authLoading && !isDemoUser) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-8">
+        <h1 className="text-xl font-semibold text-foreground">Adding resources is limited</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          In this preview, only the demo account can add study resources. Log in as demo to try it.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">

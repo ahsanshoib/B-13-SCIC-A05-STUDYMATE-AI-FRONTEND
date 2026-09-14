@@ -4,6 +4,19 @@
 
 @layer base {
   :root {
+
+
+    --toastify-color-light: hsl(var(--card));
+    --toastify-color-dark: hsl(222 25% 12%);
+    --toastify-color-success: hsl(var(--accent));
+    --toastify-color-error: hsl(var(--destructive));
+    --toastify-color-info: hsl(var(--primary));
+    --toastify-color-warning: hsl(var(--signal));
+    --toastify-text-color-light: hsl(var(--foreground));
+    --toastify-font-family: var(--font-sans), sans-serif;
+    --toastify-toast-min-height: 56px;
+    --toastify-toast-bd-radius: var(--radius);
+    
     --background: 0 0% 100%;
     --foreground: 222 20% 12%;
 

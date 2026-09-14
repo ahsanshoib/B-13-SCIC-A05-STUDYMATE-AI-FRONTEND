@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMyResources, useDeleteResource } from "@/hooks/useResources";
 import { formatStudyTime, formatDate, difficultyLabel } from "@/lib/format";
+import { useAuth } from "@/hooks/useAuth";
+import { DEMO_EMAIL } from "@/constants/demo";
 
 export default function ManageResourcesPage() {
   const { data: resources, isLoading } = useMyResources();
@@ -19,6 +21,9 @@ export default function ManageResourcesPage() {
     await deleteResource.mutateAsync(id);
     setPendingId(null);
   };
+
+  const { user } = useAuth();
+  const isDemoUser = user?.email === DEMO_EMAIL;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
