@@ -1,16 +1,4 @@
-export type Subject =
-  | "Mathematics"
-  | "Physics"
-  | "Chemistry"
-  | "Biology"
-  | "Computer Science"
-  | "Economics"
-  | "Statistics"
-  | "English Literature"
-  | "History"
-  | "Psychology"
-  | "Accounting"
-  | "Electrical Engineering";
+export type Subject = string;
 
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 
